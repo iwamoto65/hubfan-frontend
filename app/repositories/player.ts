@@ -1,4 +1,4 @@
-import nextConfig from '../next.config';
+import nextConfig from '../next.config.js';
 
 export const fetchPlayersData = async () => {
   const API_ENDPOINT = `${nextConfig.env.API_HOST_NAME}` + '/v1/players';
