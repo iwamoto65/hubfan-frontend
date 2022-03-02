@@ -1,29 +1,42 @@
-import styles from '../styles/Home.module.css'
-
-const Home = (props) => {
-  return (
-    <div className={styles.container}>
-      <p>
-        {props.players.map((player) =>
-          <span key={player.handle_name}>
-            {player.handle_name}
-            <br />
-          </span>
-        )}
-      </p>
-    </div>
-  )
-}
+import useSWR, { SWRConfig } from "swr"
+import { fetchPlayersData } from "../repositories/player"
 
 export const getStaticProps = async () => {
-  const res = await fetch("http://hubfan_rails_backend:3000/api/v1/players", { method: "GET" });
-  const json = await res.json();
+  const players = await fetchPlayersData();
 
   return {
     props: {
-      players: json
+      fallback: {
+        '/api/players': players
+      }
     }
   }
+}
+
+const PlayersContainer = () => {
+  const { data, error } = useSWR('/api/players')
+
+  if (error) return <div>{ error }</div>
+  if(!data) return <div>now fetching data...</div>
+
+  return (
+    <p>
+      {data.map((player) =>
+        <span key={ player.handle_name }>
+          { player.handle_name }
+          { player.birthday }
+        </span>
+      )}
+    </p>
+  )
+}
+
+const Home = ({ fallback }) => {
+  return (
+    <SWRConfig value={{ fallback }}>
+      <PlayersContainer />
+    </SWRConfig>
+  )
 }
 
 export default Home
